@@ -32,15 +32,15 @@ import java.util.concurrent.TimeUnit;
  * FILE MODIFIED by Patrick Löwenstein, 2016
  *
  */
-public abstract class BaseRx<T> {
+abstract class BaseRx<T> {
     private final Context ctx;
     private final Api<? extends Api.ApiOptions.NotRequiredOptions>[] services;
     private final Scope[] scopes;
-    private final Long timeoutTime;
-    private final TimeUnit timeoutUnit;
+    final Long timeoutTime;
+    final TimeUnit timeoutUnit;
 
     protected BaseRx(@NonNull RxWear rxWear, Long timeout, TimeUnit timeUnit) {
-        this.ctx = rxWear.getContext();
+        this.ctx = rxWear.ctx;
         this.services = new Api[] {Wearable.API };
         this.scopes = null;
 
@@ -48,8 +48,8 @@ public abstract class BaseRx<T> {
             this.timeoutTime = timeout;
             this.timeoutUnit = timeUnit;
         } else {
-            this.timeoutTime = RxWear.getDefaultTimeout();
-            this.timeoutUnit = RxWear.getDefaultTimeoutUnit();
+            this.timeoutTime = rxWear.timeoutTime;
+            this.timeoutUnit = rxWear.timeoutUnit;
         }
     }
 
@@ -69,10 +69,13 @@ public abstract class BaseRx<T> {
         }
     }
 
-    protected final GoogleApiClient createApiClient(ApiClientConnectionCallbacks apiClientConnectionCallbacks) {
+    protected GoogleApiClient.Builder getApiClientBuilder() {
+        return new GoogleApiClient.Builder(ctx);
+    }
 
-        GoogleApiClient.Builder apiClientBuilder = new GoogleApiClient.Builder(ctx);
+    protected GoogleApiClient createApiClient(ApiClientConnectionCallbacks apiClientConnectionCallbacks) {
 
+        GoogleApiClient.Builder apiClientBuilder = getApiClientBuilder();
 
         for (Api<? extends Api.ApiOptions.NotRequiredOptions> service : services) {
             apiClientBuilder.addApi(service);

@@ -1,9 +1,6 @@
 package com.patloew.rxwear;
 
-import android.support.annotation.NonNull;
-
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.CapabilityApi;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Wearable;
@@ -25,10 +22,10 @@ import rx.SingleSubscriber;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License. */
-public class CapabilityGetSingle extends BaseSingle<CapabilityInfo> {
+class CapabilityGetSingle extends BaseSingle<CapabilityInfo> {
 
-    private final String capability;
-    private final int nodeFilter;
+    final String capability;
+    final int nodeFilter;
 
     CapabilityGetSingle(RxWear rxWear, String capability, int nodeFilter, Long timeout, TimeUnit timeUnit) {
         super(rxWear, timeout, timeUnit);
@@ -38,15 +35,9 @@ public class CapabilityGetSingle extends BaseSingle<CapabilityInfo> {
 
     @Override
     protected void onGoogleApiClientReady(GoogleApiClient apiClient, final SingleSubscriber<? super CapabilityInfo> subscriber) {
-        setupWearPendingResult(Wearable.CapabilityApi.getCapability(apiClient, capability, nodeFilter), new ResultCallback<CapabilityApi.GetCapabilityResult>() {
-            @Override
-            public void onResult(@NonNull CapabilityApi.GetCapabilityResult getCapabilitiesResult) {
-                if (!getCapabilitiesResult.getStatus().isSuccess()) {
-                    subscriber.onError(new StatusException(getCapabilitiesResult.getStatus()));
-                } else {
-                    subscriber.onSuccess(getCapabilitiesResult.getCapability());
-                }
-            }
-        });
+        setupWearPendingResult(
+                Wearable.CapabilityApi.getCapability(apiClient, capability, nodeFilter),
+                SingleResultCallBack.get(subscriber, CapabilityApi.GetCapabilityResult::getCapability)
+        );
     }
 }

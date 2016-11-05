@@ -1,9 +1,6 @@
 package com.patloew.rxwear;
 
-import android.support.annotation.NonNull;
-
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.wearable.CapabilityApi;
 import com.google.android.gms.wearable.Wearable;
@@ -25,9 +22,9 @@ import rx.SingleSubscriber;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License. */
-public class CapabilityRemoveLocalSingle extends BaseSingle<Status> {
+class CapabilityRemoveLocalSingle extends BaseSingle<Status> {
 
-    private final String capability;
+    final String capability;
 
     CapabilityRemoveLocalSingle(RxWear rxWear, String capability, Long timeout, TimeUnit timeUnit) {
         super(rxWear, timeout, timeUnit);
@@ -36,15 +33,9 @@ public class CapabilityRemoveLocalSingle extends BaseSingle<Status> {
 
     @Override
     protected void onGoogleApiClientReady(GoogleApiClient apiClient, final SingleSubscriber<? super Status> subscriber) {
-        setupWearPendingResult(Wearable.CapabilityApi.removeLocalCapability(apiClient, capability), new ResultCallback<CapabilityApi.RemoveLocalCapabilityResult>() {
-            @Override
-            public void onResult(@NonNull CapabilityApi.RemoveLocalCapabilityResult removeLocalCapabilityResult) {
-                if (!removeLocalCapabilityResult.getStatus().isSuccess()) {
-                    subscriber.onError(new StatusException(removeLocalCapabilityResult.getStatus()));
-                } else {
-                    subscriber.onSuccess(removeLocalCapabilityResult.getStatus());
-                }
-            }
-        });
+        setupWearPendingResult(
+                Wearable.CapabilityApi.removeLocalCapability(apiClient, capability),
+                SingleResultCallBack.get(subscriber, CapabilityApi.RemoveLocalCapabilityResult::getStatus)
+        );
     }
 }
